@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import tensorflow as tf
@@ -8,15 +9,20 @@ import io
 app = Flask(__name__)
 CORS(app)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_PATH = os.path.join(BASE_DIR, "waste_classifier.tflite")
+LABELS_PATH = os.path.join(BASE_DIR, "labels.txt")
+
 # Load TFLite model
-interpreter = tf.lite.Interpreter(model_path="waste_classifier.tflite")
+interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
 
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 # Load labels
-with open("labels.txt", "r") as f:
+with open(LABELS_PATH, "r") as f:
     labels = [line.strip() for line in f.readlines()]
 
 IMG_SIZE = 224
@@ -53,5 +59,6 @@ import os
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
